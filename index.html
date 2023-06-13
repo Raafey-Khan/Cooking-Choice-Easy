@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Food and Sweet Suggestions</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      background-image: url("background-image.avif");
+      background-size: cover;
+      background-position: center;
+    }
+
+    /* New CSS styles for the week container */
+    #week-container {
+      background-color: #FFFFFF;
+      padding: 2em;
+      margin-top: 2em;
+      border-radius: 1em;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .day-container {
+      margin-bottom: 1em;
+    }
+
+    .food-form {
+      margin-bottom: 1em;
+    }
+
+    .food-form label {
+      display: inline-block;
+      width: 100px;
+    }
+
+
+    .food-form input[type="text"] {
+      width: 200px;
+    }
+
+    .food-form button {
+      margin-left: 1em;
+    }
+
+    .remove-button{
+      font-size: 12px;
+      padding: 4px 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1 class="heading">What should I cook today?</h1>
+    <p>Click the button below to get a random food suggestion.</p>
+  </div>
+  
+  <div class="content">
+    <div class="button-container">
+      <button onclick="getRandomFood()">Get Food Suggestion</button>
+      <p id="food-suggestion"></p>
+    </div>
+    <div class="button-container">
+      <button onclick="getRandomSweet()">Get Sweet Suggestion</button>
+      <p id="sweet-suggestion"></p>
+    </div>
+    <div id="week-container">
+      <div id="week-suggestions"></div>
+      <div class="food-form">
+        <form onsubmit="addFood(event)">
+          <label for="day-select">Day:</label>
+          <select id="day-select">
+            <option value="0">Sunday</option>
+            <option value="1">Monday</option>
+            <option value="2">Tuesday</option>
+            <option value="3">Wednesday</option>
+            <option value="4">Thursday</option>
+            <option value="5">Friday</option>
+            <option value="6">Saturday</option>
+          </select>
+          <label for="food-input">Food:</label>
+          <input type="text" id="food-input" required>
+          <button type="submit">Add</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const foodSuggestions = {
+      1: ['Add food here'],
+      2: ['Add food here'],
+      3: ['Add food here'],
+      4: ['Add food here'],
+      5: ['Add food here'],
+      6: ['Your Tasty food will be here'],
+      0: ['Food here']
+    };
+
+    const sweetSuggestions = {
+      1: ['add sweet here'],
+      2: ['add sweet here'],
+      3: ['add sweet here'],
+      4: ['add sweet here'],
+      5: ['add sweet here'],
+      6: ['add sweet here'],
+      0: ['add sweet here']
+    };
+
+    function getRandomFood() {
+      const date = new Date();
+      const dayOfWeek = date.getDay();
+      const day = getDayName(dayOfWeek);
+      const foodList = foodSuggestions[dayOfWeek];
+
+      if (foodList && foodList.length > 0) {
+        const randomIndex = Math.floor(Math.random() * foodList.length);
+        const suggestion = foodList[randomIndex];
+        document.getElementById('food-suggestion').textContent = `${day}: ${suggestion}`;
+      } else {
+        document.getElementById('food-suggestion').textContent = 'No suggestion for today';
+      }
+    }
+
+    function getRandomSweet() {
+      const date = new Date();
+      const dayOfWeek = date.getDay();
+      const day = getDayName(dayOfWeek);
+      const sweetList = sweetSuggestions[dayOfWeek];
+
+      if (sweetList && sweetList.length > 0) {
+        const randomIndex = Math.floor(Math.random() * sweetList.length);
+        const suggestion = sweetList[randomIndex];
+        document.getElementById('sweet-suggestion').textContent = `${day}: ${suggestion}`;
+      } else {
+        document.getElementById('sweet-suggestion').textContent = 'No sweet suggestion for today';
+      }
+    }
+
+    function getDayName(dayOfWeek) {
+      const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+      return days[dayOfWeek];
+    }
+
+    function addFood(event) {
+      event.preventDefault();
+      const daySelect = document.getElementById('day-select');
+      const foodInput = document.getElementById('food-input');
+      const dayIndex = parseInt(daySelect.value);
+      const food = foodInput.value.trim();
+
+      if (!food) {
+        return;
+      }
+
+      if (!foodSuggestions[dayIndex]) {
+        foodSuggestions[dayIndex] = [];
+      }
+
+      foodSuggestions[dayIndex].push(food);
+      displayWeekSuggestions();
+      foodInput.value = '';
+    }
+
+    function removeFood(dayIndex, foodIndex) {
+      if (foodSuggestions[dayIndex]) {
+        foodSuggestions[dayIndex].splice(foodIndex, 1);
+        displayWeekSuggestions();
+      }
+    }
+
+    function displayWeekSuggestions() {
+      const weekContainer = document.getElementById('week-suggestions');
+      weekContainer.innerHTML = '';
+
+      for (let i = 0; i < 7; i++) {
+        const day = getDayName(i);
+        const foodList = foodSuggestions[i] || [];
+
+        const dayContainer = document.createElement('div');
+        dayContainer.classList.add('day-container', 'box');
+
+        const dayHeading = document.createElement('h2');
+        dayHeading.classList.add('day-heading');
+        dayHeading.textContent = day;
+
+        const foodHeading = document.createElement('h3');
+        foodHeading.classList.add('food-heading');
+        foodHeading.textContent = 'Food:';
+
+        const foodListElement = document.createElement('ul');
+        if (foodList.length > 0) {
+          foodList.forEach((food, index) => {
+            const foodItem = document.createElement('li');
+            foodItem.textContent = food;
+            const removeButton = document.createElement('button');
+            removeButton.setAttribute('id', 'delete');
+            removeButton.textContent = 'Remove';
+            removeButton.addEventListener('click', () => {
+              removeFood(i, index);
+            });
+            foodItem.appendChild(removeButton);
+            foodListElement.appendChild(foodItem);
+          });
+        } else {
+          const noFoodItem = document.createElement('li');
+          noFoodItem.textContent = 'No suggestion for today';
+          foodListElement.appendChild(noFoodItem);
+        }
+
+        dayContainer.appendChild(dayHeading);
+        dayContainer.appendChild(foodHeading);
+        dayContainer.appendChild(foodListElement);
+
+        weekContainer.appendChild(dayContainer);
+      }
+    }
+
+    window.addEventListener('load', displayWeekSuggestions);
+  </script>
+</body>
+</html>
